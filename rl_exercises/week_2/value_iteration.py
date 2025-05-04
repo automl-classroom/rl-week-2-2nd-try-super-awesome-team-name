@@ -47,13 +47,16 @@ class ValueIteration(AbstractAgent):
         self.seed = seed
 
         # TODO: Extract MDP components from the environment
-        self.S = None
-        self.A = None
-        self.T = None
-        self.R_sa = None
-        self.n_states = None
-        self.n_actions = None
-
+        self.S = self.env.states
+        self.A = self.env.actions
+        self.T = self.env.T
+        self.n_states = len(self.env.states)
+        self.n_actions = self.env.action_space.n
+        self.R_sa = np.zeros((self.n_states, self.n_actions))
+        for s in range(self.n_states):
+            for a in range(self.n_actions):
+                for s_prime in range(self.n_states):
+                    self.R_sa[s, a] += self.T[s, a, s_prime] * self.env.rewards[s_prime]
         # placeholders
         self.V = np.zeros(self.n_states, dtype=float)
         self.pi = np.zeros(self.n_states, dtype=int)
@@ -83,8 +86,7 @@ class ValueIteration(AbstractAgent):
         if not self.policy_fitted:
             self.update_agent()
 
-        # TODO: Return action from learned policy
-        raise NotImplementedError("predict_action() is not implemented.")
+        return (self.pi[observation], {})
 
 
 def value_iteration(
